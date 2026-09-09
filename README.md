@@ -1,58 +1,173 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RepuestosApp-zeta
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación Laravel para gestión y comercio de repuestos con interfaz web, usuarios y contenido comercial.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Antes de ejecutar el proyecto asegúrate de tener instalado:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.3 o superior
+- Composer
+- Node.js y npm
+- MySQL o MariaDB
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Ejecutar el proyecto
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+En la raíz del proyecto ejecuta:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Luego configura la base de datos en el archivo `.env`:
 
-## Contributing
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=repuestosapp
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Después crea la base de datos y ejecuta las migraciones:
 
-## Code of Conduct
+```bash
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Para levantar la aplicación en modo local:
 
-## Security Vulnerabilities
+```bash
+php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+La aplicación quedará disponible en:
 
-## License
+```text
+http://127.0.0.1:8000
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Si quieres compilar los assets del frontend en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+Y para producción:
+
+```bash
+npm run build
+```
+
+## Uso básico
+
+1. Abre la URL local en el navegador.
+2. Registra un usuario o inicia sesión.
+3. Navega por las secciones públicas y del panel administrativo.
+4. Gestiona perfiles, contenido y operaciones del sistema.
+5. Si se cargan archivos, revisa que la carpeta `storage` tenga permisos correctos.
+
+## Socket / WebSocket
+
+Este proyecto puede usar un socket para comunicaciones en tiempo real, como notificaciones, actualización de estados o eventos del sistema.
+
+### Opción 1: Laravel Reverb (recomendado)
+
+Si vas a usar WebSockets con Laravel, instala Reverb:
+
+```bash
+composer require laravel/reverb
+php artisan reverb:start
+```
+
+Esto levanta el servidor de WebSocket en el puerto por defecto, normalmente:
+
+```text
+ws://127.0.0.1:8001
+```
+
+En el frontend puedes conectarte con JavaScript:
+
+```js
+import Echo from 'laravel-echo';
+
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+    key: 'app-key',
+    wsHost: window.location.hostname,
+    wsPort: 8080,
+    wssPort: 8080,
+    forceTLS: false,
+    enabledTransports: ['ws', 'wss'],
+});
+
+window.Echo.channel('orders').listen('OrderCreated', (event) => {
+    console.log('Nuevo pedido:', event);
+});
+```
+
+### Opción 2: Socket.io
+
+Si prefieres un servidor Socket.IO personalizado:
+
+```bash
+npm install socket.io
+```
+
+Y en un archivo de servidor:
+
+```js
+const io = require('socket.io')(3001);
+
+io.on('connection', (socket) => {
+    console.log('Cliente conectado');
+
+    socket.on('join-room', (room) => {
+        socket.join(room);
+    });
+
+    socket.on('send-message', (payload) => {
+        io.to(payload.room).emit('new-message', payload);
+    });
+});
+```
+
+Luego desde el navegador:
+
+```js
+const socket = io('http://localhost:3001');
+
+socket.emit('join-room', 'ventas');
+
+socket.on('new-message', (data) => {
+    console.log(data);
+});
+```
+
+## Solución de problemas comunes
+
+### Error de permisos en storage
+
+```bash
+chmod -R 775 storage bootstrap/cache
+```
+
+### Error de base de datos
+
+Verifica que la base de datos exista y que los datos de `.env` coincidan con tu entorno local.
+
+### Error al compilar frontend
+
+```bash
+rm -rf node_modules
+npm install
+npm run build
+```
+
+## Licencia
+
+Este proyecto usa la licencia MIT de Laravel y está sujeto a las condiciones del proyecto base.
