@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+	display: none !important;
+}
+
+@layer base {
+	:root {
+		--zeta-bg: #edf2fa;
+		--zeta-bg-soft: #e3eaf5;
+		--zeta-panel: #ffffff;
+		--zeta-border: #c9d6ea;
+		--zeta-text: #13294b;
+		--zeta-muted: #4f6280;
+		--zeta-accent: #1f3f79;
+		--zeta-accent-soft: #2f5ea8;
+	}
+}
+
+@layer components {
+	.zeta-shell {
+		background: radial-gradient(circle at top right, #f7faff 0%, var(--zeta-bg) 42%, var(--zeta-bg-soft) 100%);
+		color: var(--zeta-text);
+	}
+
+	.zeta-nav {
+		background-color: #f5f8fe;
+		border-color: var(--zeta-border);
+		backdrop-filter: saturate(140%);
+	}
+
+	.zeta-card {
+		background-color: var(--zeta-panel);
+		border: 1px solid var(--zeta-border);
+		box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+	}
+
+	.zeta-brand-wordmark {
+		letter-spacing: 0.08em;
+		font-weight: 700;
+		color: var(--zeta-accent);
+	}
+}
